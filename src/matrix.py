@@ -11,13 +11,26 @@ class Matrix:
         self._rows = len(matrix)
         self._columns = len(matrix[0])
 
-    def __getitem__(self, item: int) -> list[float]:
+    def __getitem__(self, item: int) -> Union[list[float], float]:
         """
         Get a row of the matrix.
         :param item: index of the row
-        :return: list[float]: row of the matrix
+        :return: list[float] or float: row of the matrix
         """
+        if self._columns == 1:
+            return self._matrix[item][0]
         return self._matrix[item]
+
+    def __setitem__(self, row: int, value: Union[list[float], float]) -> None:
+        """
+        Set a row of the matrix.
+        :param row: index of the row
+        :param value: list of floats or a float
+        """
+        if self._columns == 1:
+            self._matrix[row][0] = value
+        else:
+            self._matrix[row] = value
 
     def _arithmetical_operation(self, other: 'Matrix', operation: callable) -> 'Matrix':
         """
@@ -77,7 +90,7 @@ class Matrix:
         """
         return Matrix([row.copy() for row in self._matrix])
 
-    def lu_decomposition(self) -> tuple['Matrix', 'Matrix', 'Matrix']:
+    def _lu_decomposition(self) -> tuple['Matrix', 'Matrix', 'Matrix']:
         """
         Perform LU decomposition of the matrix.
         :return: tuple[Matrix, Matrix, Matrix]: L, U, P matrices
@@ -101,7 +114,7 @@ class Matrix:
         :param b: Matrix object
         :return: Matrix: solution of the system of linear equations
         """
-        l, u, p = self.lu_decomposition()
+        l, u, p = self._lu_decomposition()
         b = p * b
 
         n = self._rows
@@ -110,12 +123,12 @@ class Matrix:
 
         # Solve Ly = Pb
         for i in range(n):
-            y[i][0] = b[i][0] - sum(l[i][j] * y[j][0] for j in range(i))
+            y[i] = b[i] - sum(l[i][j] * y[j] for j in range(i))
 
         # Solve Ux = y
         for i in range(n - 1, -1, -1):
-            x[i][0] = y[i][0] - sum(u[i][j] * x[j][0] for j in range(i + 1, n))
-            x[i][0] /= u[i][i]
+            x[i] = y[i] - sum(u[i][j] * x[j] for j in range(i + 1, n))
+            x[i] /= u[i][i]
 
         return x
 
@@ -173,6 +186,6 @@ class Matrix:
                 max_ind = k
 
         if max_ind != i:
-            u[i], u[max_ind] = u[max_ind], u[i]
-            l[i], l[max_ind] = l[max_ind], l[i]
-            p[i], p[max_ind] = p[max_ind], p[i]
+            u._matrix[i], u._matrix[max_ind] = u._matrix[max_ind], u._matrix[i]
+            l._matrix[i], l._matrix[max_ind] = l._matrix[max_ind], l._matrix[i]
+            p._matrix[i], p._matrix[max_ind] = p._matrix[max_ind], p._matrix[i]
