@@ -2,20 +2,20 @@ from typing import Union
 
 
 class Matrix:
-    def __init__(self, matrix: list[list[int]]):
+    def __init__(self, matrix: list[list[float]]):
         """
         Initialize the matrix.
-        :param matrix: 2D list of integers
+        :param matrix: 2D list of floats
         """
         self._matrix = matrix
         self._rows = len(matrix)
         self._columns = len(matrix[0])
 
-    def __getitem__(self, item: int) -> list[int]:
+    def __getitem__(self, item: int) -> list[float]:
         """
         Get a row of the matrix.
         :param item: index of the row
-        :return: list[int]: row of the matrix
+        :return: list[float]: row of the matrix
         """
         return self._matrix[item]
 
@@ -48,13 +48,13 @@ class Matrix:
         """
         return self._arithmetical_operation(other, lambda x, y: x - y)
 
-    def __mul__(self, other: Union['Matrix', int]) -> 'Matrix':
+    def __mul__(self, other: Union['Matrix', float]) -> 'Matrix':
         """
         Multiply this matrix by another matrix or a scalar.
-        :param other: Matrix object or integer scalar
+        :param other: Matrix object or float scalar
         :return: Matrix: product of two matrices or scalar multiplication
         """
-        if isinstance(other, int):
+        if isinstance(other, float):
             return Matrix([[element * other for element in row] for row in self._matrix])
 
         if isinstance(other, Matrix):
@@ -102,13 +102,15 @@ class Matrix:
         :return: Matrix: solution of the system of linear equations
         """
         l, u, p = self.lu_decomposition()
+        b = p * b
+
         n = self._rows
         y = Matrix.create_matrix(n, 1)
         x = Matrix.create_matrix(n, 1)
 
         # Solve Ly = Pb
         for i in range(n):
-            y[i][0] = b[p[i][0]][0] - sum(l[i][j] * y[j][0] for j in range(i))
+            y[i][0] = b[i][0] - sum(l[i][j] * y[j][0] for j in range(i))
 
         # Solve Ux = y
         for i in range(n - 1, -1, -1):
@@ -126,11 +128,11 @@ class Matrix:
         return self._columns
 
     @property
-    def matrix(self) -> list[list[int]]:
+    def matrix(self) -> list[list[float]]:
         return self._matrix
 
     @staticmethod
-    def create_matrix(rows: int, columns: int, value: int = 0) -> 'Matrix':
+    def create_matrix(rows: int, columns: int, value: float = 0) -> 'Matrix':
         """
         Create a matrix with the specified dimensions and fill it with the specified value.
         :param rows: number of rows
@@ -153,16 +155,7 @@ class Matrix:
             matrix[i][i] = value
         return matrix
 
-    @staticmethod
-    def from_list(vector: list) -> 'Matrix':
-        """
-        Create a matrix from a list of lists.
-        :param vector: 2D list of integers
-        :return: Matrix: matrix created from the list
-        """
-        return Matrix([[element] for element in vector])
-
-    def flatten(self) -> list:
+    def flatten(self) -> list[float]:
         """
         Flatten the matrix into a list.
         :return: list: flattened matrix
