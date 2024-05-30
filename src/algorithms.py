@@ -42,7 +42,7 @@ def get_selection_points(nodes: list[tuple[float, float]], strategy: Callable[[f
     return result
 
 
-def get_interpolation_points(nodes: list[tuple[float, float]], n: int) -> list[float]:
+def get_linspace_points(nodes: list[tuple[float, float]], n: int) -> list[float]:
     """
     Returns the interpolation points.
     :param nodes: list of tuples of x and y values
@@ -58,7 +58,11 @@ def read_nodes(path: str) -> list[tuple[float, float]]:
     :param path: path to the CSV file
     :return: list: list of tuples of x and y values
     """
-    return [(row.iloc[0], row.iloc[1]) for _, row in pd.read_csv(path).iterrows()]
+    if path.endswith('.csv'):
+        return [(row[0], row[1]) for row in pd.read_csv(path).values]
+
+    with open(path, 'r') as file:
+        return [(float(x), float(y)) for x, y in (line.strip().split() for line in file)]
 
 
 def linspace(start: float, stop: float, num: int) -> list:
@@ -72,7 +76,7 @@ def linspace(start: float, stop: float, num: int) -> list:
     return [start + (stop - start) * i / (num - 1) for i in range(num)]
 
 
-def chebyshev_nodes(start: float, stop: float, num: int) -> list[float]:
+def get_chebyshev_nodes(start: float, stop: float, num: int) -> list[float]:
     """
     Create an array of Chebyshev nodes.
     :param start: start value
